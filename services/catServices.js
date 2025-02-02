@@ -1,4 +1,5 @@
 const catModel = require('../models/catModel')
+const ApiError = require('../utils/ApiError')
 const slugify = require('slugify')
 const asyncHandler = require('express-async-handler')
 // @desc get category
@@ -24,11 +25,11 @@ exports.createCategory = asyncHandler(async (req, res) => {
 // @desc get specific category with id
 // @route GET /api/v1/categories/:id
 //@access public
-exports.getOneCategory = asyncHandler(async (req, res) => {
+exports.getOneCategory = asyncHandler(async (req, res, next) => {
     const { id } = req.params
     const category = await catModel.findById(id)
     if (!category) {
-        res.status(404).json({ msg: `catrgory not found for this id ${id}` })
+        return next(new ApiError(`No category found for this ID ${id}`, 404))
     }
     res.status(200).json({ data: category })
 })
@@ -40,7 +41,8 @@ exports.updatecategory = asyncHandler(async (req, res) => {
     const { name } = req.body
     const category = await catModel.findOneAndUpdate({ _id: id }, { name, slug: slugify(name) }, { new: true })
     if (!category) {
-        res.status(404).json({ msg: `catrgory not found for this id ${id}` })
+        return next(new ApiError(`No category found for this ID ${id}`, 404))
+
     }
     res.status(200).json({ data: category })
 })
@@ -51,7 +53,8 @@ exports.deleteCategory = asyncHandler(async (req, res) => {
     const { id } = req.params
     const category = await catModel.findByIdAndDelete(id)
     if (!category) {
-        res.status(404).json({ msg: `catrgory not found for this id ${id}` })
+        return next(new ApiError(`No category found for this ID ${id}`, 404))
+
     }
     res.status(204).send()
 })
