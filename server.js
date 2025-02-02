@@ -28,10 +28,12 @@ app.all('*', (req, res, next) => {
 app.use(globalError)
 const PORT = process.env.PORT || 8000; // Default to 8000 if PORT is not set
 
-app.listen(PORT, () => {
+const server = app.listen(PORT, () => {
     console.log(`App is running on port ${PORT}`);
 });
 process.on("unhandledRejection", err => {
     console.error(`Unhandled rejection error : ${err}`);
-    process.exit(1);
+    server.close(() => {
+        process.exit(1);
+    })
 })
