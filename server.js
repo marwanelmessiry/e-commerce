@@ -6,6 +6,7 @@ const globalError = require('./MiddleWares/errorMiddleware')
 const ApiError = require('./utils/ApiError')
 const dbConnection = require('./config/database');
 const router = require('./Routes/CatRoutes');
+const Subrouter = require('./Routes/SubCatRoute');
 
 // Connect to the database
 dbConnection();
@@ -21,11 +22,14 @@ if (process.env.NODE_ENV === 'development') {
 
 // Routes
 app.use('/api/v1/categories', router); // Added leading slash
+app.use('/api/v1/Subcategories', Subrouter);
 app.all('*', (req, res, next) => {
 
     next(new ApiError("message", StatusCode))
 })
-app.use(globalError)
+// Global error handling middleware
+app.use(globalError);
+
 const PORT = process.env.PORT || 8000; // Default to 8000 if PORT is not set
 
 const server = app.listen(PORT, () => {
