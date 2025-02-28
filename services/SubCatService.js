@@ -2,6 +2,19 @@ const SubcatModel = require('../models/subCatModel');
 const ApiError = require('../utils/ApiError');
 const slugify = require('slugify');
 const asyncHandler = require('express-async-handler');
+exports.setCatIdToBody = (req, res, next) => {
+    if (!req.body.Cat) {
+        req.body.Cat = req.params.categoryId;
+        console.log(req.body.Cat)
+        next();
+    }
+};
+exports.createfilterObject = (req, res, next) => {
+    let filter = {}
+    if (req.params.categoryId) filter = { Cat: req.params.categoryId }
+    req.filter = filter
+    next()
+}
 // @desc get Subcategory
 // @route GET /api/v1/Subcategories
 //@access public
@@ -9,7 +22,8 @@ exports.getSubCategories = asyncHandler(async (req, res) => {
     const page = req.query.page * 1 || 1
     const limit = req.query.limit * 1 || 5
     const skip = (page - 1) * limit
-    const SubCats = await SubcatModel.find({}).skip(skip).limit(limit).populate({ path: 'Cat', select: 'name -_id' })
+
+    const SubCats = await SubcatModel.find(req.filter).skip(skip).limit(limit).populate({ path: 'Cat', select: 'name -_id' })
     res.status(200).json({ results: SubCats.length, data: SubCats })
 
 })
@@ -28,6 +42,8 @@ exports.getOneSubCategory = asyncHandler(async (req, res, next) => {
 // @route POST /api/v1/Subcategories
 // @access private
 exports.createSubCategory = asyncHandler(async (req, res) => {
+    console.log(req.body.Cat)
+    console.log(req.params.categoryId)
     const { name, Cat } = req.body; // Ensure 'Cat' matches your schema
 
     const newSubcat = await SubcatModel.create({ name, slug: slugify(name), Cat });
