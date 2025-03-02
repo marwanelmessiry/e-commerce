@@ -7,6 +7,7 @@ const ApiError = require('./utils/ApiError')
 const dbConnection = require('./config/database');
 const router = require('./Routes/CatRoutes');
 const brandRouter = require('./Routes/brandRoutes');
+const productRouter = require('./Routes/productRoutes');
 const Subrouter = require('./Routes/SubCatRoute');
 
 // Connect to the database
@@ -24,6 +25,7 @@ if (process.env.NODE_ENV === 'development') {
 // Routes
 app.use('/api/v1/categories', router);
 app.use('/api/v1/brands', brandRouter);
+app.use('/api/v1/products', productRouter);
 app.use('/api/v1/Subcategories', Subrouter);
 app.all('*', (req, res, next) => {
 
