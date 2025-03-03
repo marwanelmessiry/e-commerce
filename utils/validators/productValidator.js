@@ -68,6 +68,15 @@ exports.createProductValidator = [
             if (subCategories.length !== subCatIds.length) {
                 throw new Error('One or more SubCategory IDs do not exist');
             }
+        })
+        .custom((val, { req }) => {
+            return subCatModel.find({ Cat: req.body.Category }).then((subcats) => {
+                const SubCatsInDb = subcats.map(subcat => subcat._id.toString());
+
+                if (!val.every(v => SubCatsInDb.includes(v))) {
+                    return Promise.reject(new Error('One or more SubCategory IDs do not belong to the selected Category'));
+                }
+            });
         }),
 
 
