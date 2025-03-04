@@ -2,17 +2,28 @@ const productModel = require('../models/productModel')
 const ApiError = require('../utils/ApiError')
 const slugify = require('slugify')
 const asyncHandler = require('express-async-handler')
+const ApiFeatures = require('../utils/apiFeatures')
 // @desc get product
 // @route GET /api/v1/products
 //@access public
-exports.getproducts = asyncHandler(async (req, res) => {
-    const page = req.query.page * 1 || 1
-    const limit = req.query.limit * 1 || 5
-    const skip = (page - 1) * limit
-    const products = await productModel.find({}).skip(skip).limit(limit)
-    res.status(200).json({ results: products.length, data: products })
 
-})
+
+exports.getproducts = asyncHandler(async (req, res) => {
+    // Initialize API features
+    const apiFeatures = new ApiFeatures(productModel.find(), req.query)
+        .filter()
+        .search()
+        .sort()
+        .limitFields()
+        .pagination();
+
+    // Execute the query
+    const products = await apiFeatures.mongooseQuery.populate({ path: 'Category', select: 'name -_id' });
+
+    // Send response
+    res.status(200).json({ results: products.length, data: products });
+});
+
 // @desc create product
 // @route POST /api/v1/products
 //@access private
